@@ -3,18 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const fields = [
+  { name: "summary", label: "Professional Summary", placeholder: "Computer science student with experience in web development...", rows: 3 },
+  { name: "experience", label: "Work Experience", placeholder: "2023 – present: Intern at XYZ, built React applications...", rows: 4 },
+  { name: "education", label: "Education", placeholder: "2021 – present: Faculty of Informatics, Zagreb", rows: 2 },
+  { name: "skills", label: "Skills", placeholder: "Python, JavaScript, React, Git, SQL...", rows: 2 },
+];
+
 export default function Builder() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    full_name: "",
-    email: "",
-    phone: "",
-    location: "",
-    summary: "",
-    experience: "",
-    education: "",
-    skills: "",
+    full_name: "", email: "", phone: "", location: "",
+    summary: "", experience: "", education: "", skills: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -29,96 +30,81 @@ export default function Builder() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
       localStorage.setItem("generatedCV", data.cv);
       router.push("/result");
-    } catch (error) {
-      alert("Greška pri generiranju CV-a. Provjeri je li backend pokrenut.");
+    } catch {
+      alert("Error connecting to backend. Is it running?");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Generiraj CV</h1>
-        <p className="text-gray-400">Ispuni podatke i AI će generirati profesionalni CV.</p>
+    <main className="page">
+      <div className="glow" style={{ top: "-100px", right: "-200px" }} />
+      <div className="container" style={{ position: "relative", zIndex: 1 }}>
 
-        <div className="space-y-4">
-          {/* Osnovni podaci */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Ime i prezime</label>
-              <input
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleChange}
-                placeholder="Ivan Horvat"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Email</label>
-              <input
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="ivan@email.com"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Telefon</label>
-              <input
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+385 91 234 5678"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Lokacija</label>
-              <input
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Zagreb, Croatia"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Textarea polja */}
-          {[
-            { name: "summary", label: "Kratki opis (tko si, što tražiš)", placeholder: "Student informatike s iskustvom u web razvoju..." },
-            { name: "experience", label: "Radno iskustvo", placeholder: "2023 - danas: Stažist u tvrtki XYZ, radio na React aplikacijama..." },
-            { name: "education", label: "Obrazovanje", placeholder: "2021 - danas: Fakultet informatike, Zagreb" },
-            { name: "skills", label: "Vještine", placeholder: "Python, JavaScript, React, Git, SQL..." },
-          ].map((field) => (
-            <div key={field.name}>
-              <label className="block text-sm text-gray-400 mb-1">{field.label}</label>
-              <textarea
-                name={field.name}
-                value={formData[field.name as keyof typeof formData]}
-                onChange={handleChange}
-                placeholder={field.placeholder}
-                rows={3}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"
-              />
-            </div>
-          ))}
+        <div style={{ marginBottom: "40px" }}>
+          <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "36px", marginBottom: "8px" }}>
+            Generate CV
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "15px" }}>
+            Fill in your details and AI will craft a professional CV.
+          </p>
         </div>
 
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors"
-        >
-          {loading ? "Generiranje..." : "Generiraj CV"}
+        <div className="card" style={{ marginBottom: "16px" }}>
+          <p style={{ fontSize: "11px", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", fontWeight: 600, marginBottom: "20px", textTransform: "uppercase" }}>
+            Personal Info
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            {[
+              { name: "full_name", label: "Full Name", placeholder: "Ivan Horvat" },
+              { name: "email", label: "Email", placeholder: "ivan@email.com" },
+              { name: "phone", label: "Phone", placeholder: "+385 91 234 5678" },
+              { name: "location", label: "Location", placeholder: "Zagreb, Croatia" },
+            ].map((f) => (
+              <div key={f.name}>
+                <label className="label">{f.label}</label>
+                <input
+                  name={f.name}
+                  value={formData[f.name as keyof typeof formData]}
+                  onChange={handleChange}
+                  placeholder={f.placeholder}
+                  className="input"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="card" style={{ marginBottom: "24px" }}>
+          <p style={{ fontSize: "11px", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", fontWeight: 600, marginBottom: "20px", textTransform: "uppercase" }}>
+            Professional Details
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+            {fields.map((f) => (
+              <div key={f.name}>
+                <label className="label">{f.label}</label>
+                <textarea
+                  name={f.name}
+                  value={formData[f.name as keyof typeof formData]}
+                  onChange={handleChange}
+                  placeholder={f.placeholder}
+                  rows={f.rows}
+                  className="input"
+                  style={{ resize: "none" }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
+          {loading ? "Generating your CV..." : "Generate CV →"}
         </button>
+
       </div>
     </main>
   );
