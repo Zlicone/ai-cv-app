@@ -154,7 +154,7 @@ export default function Result() {
         </div>
 
         {/* Actions */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+        <div id="cv-actions" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
           <button onClick={handleCopy} style={{
             padding: "13px",
             borderRadius: "10px",
