@@ -12,12 +12,12 @@ export default function Analyzer() {
     if (!cvText.trim()) { alert("Please paste your CV text first!"); return; }
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze-cv`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze-cv`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cv_text: cvText, job_description: jobDescription }),
       });
-      const data = await response.json();
+      const data = await res.json();
       setAnalysis(data.analysis);
     } catch {
       alert("Error connecting to backend.");
@@ -26,79 +26,127 @@ export default function Analyzer() {
     }
   };
 
+  const card = (children: React.ReactNode, mb = "14px") => (
+    <div style={{
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+      borderRadius: "14px",
+      padding: "24px",
+      marginBottom: mb,
+    }}>{children}</div>
+  );
+
+  const sectionLabel = (text: string) => (
+    <p style={{
+      fontSize: "10px",
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      color: "var(--text-muted)",
+      fontWeight: 600,
+      marginBottom: "14px",
+    }}>{text}</p>
+  );
+
   return (
-    <main className="page">
-      <div className="glow" style={{ bottom: "-200px", right: "-200px" }} />
-      <div className="container" style={{ position: "relative", zIndex: 1 }}>
+    <main style={{ padding: "40px 24px", minHeight: "calc(100vh - 60px)" }}>
+      <div style={{ maxWidth: "580px", margin: "0 auto" }}>
 
-        <div style={{ marginBottom: "40px" }}>
-          <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "36px", marginBottom: "8px" }}>
-            Analyze CV
-          </h1>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "15px" }}>
-            Paste your CV and get instant AI-powered feedback.
-          </p>
-        </div>
+        <p style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "6px" }}>
+          AI-powered feedback
+        </p>
+        <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "30px", letterSpacing: "-0.02em", marginBottom: "32px", color: "white" }}>
+          Analyze CV
+        </h1>
 
-        <div className="card" style={{ marginBottom: "16px" }}>
-          <label className="label">Your CV text *</label>
-          <textarea
-            value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
-            placeholder="Paste your CV text here..."
-            rows={10}
-            className="input"
-            style={{ resize: "none" }}
-          />
-        </div>
+        {card(
+          <>
+            {sectionLabel("Your CV text *")}
+            <textarea
+              value={cvText}
+              onChange={e => setCvText(e.target.value)}
+              placeholder="Paste your CV text here..."
+              rows={10}
+            />
+          </>
+        )}
 
-        <div className="card" style={{ marginBottom: "24px" }}>
-          <label className="label">Job description (optional)</label>
-          <textarea
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste the job posting here — AI will tailor the analysis to this specific role..."
-            rows={4}
-            className="input"
-            style={{ resize: "none" }}
-          />
-        </div>
+        {card(
+          <>
+            {sectionLabel("Job description (optional)")}
+            <p style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "12px", lineHeight: 1.6 }}>
+              Paste the job posting and AI will tailor the analysis to that specific role.
+            </p>
+            <textarea
+              value={jobDescription}
+              onChange={e => setJobDescription(e.target.value)}
+              placeholder="Junior Frontend Developer at XYZ — looking for a candidate with 1+ years of experience..."
+              rows={4}
+            />
+          </>,
+          "24px"
+        )}
 
-        <button className="btn-primary" onClick={handleAnalyze} disabled={loading}>
+        <button
+          onClick={handleAnalyze}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: "10px",
+            border: "none",
+            background: loading ? "rgba(0,229,255,0.4)" : "var(--accent)",
+            color: "#080b12",
+            fontFamily: "Syne, sans-serif",
+            fontSize: "13px",
+            fontWeight: 800,
+            cursor: loading ? "not-allowed" : "pointer",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            marginBottom: "32px",
+          }}
+        >
           {loading ? "Analyzing..." : "Analyze CV →"}
         </button>
 
-        {/* Results */}
         {analysis && (
-          <div style={{ marginTop: "32px" }}>
-            <div style={{
-              display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px",
-            }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--accent)" }} />
-              <h2 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "18px", color: "var(--accent)" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "14px" }}>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--accent)" }} />
+              <p style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "13px", color: "var(--accent)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                 AI Feedback
-              </h2>
+              </p>
             </div>
-            <div className="card">
+            {card(
               <pre style={{
                 whiteSpace: "pre-wrap",
                 fontFamily: "DM Sans, sans-serif",
                 fontSize: "14px",
                 lineHeight: 1.8,
-                color: "rgba(255,255,255,0.8)",
-              }}>
-                {analysis}
-              </pre>
-            </div>
+                color: "rgba(255,255,255,0.75)",
+              }}>{analysis}</pre>,
+              "12px"
+            )}
             <button
-              className="btn-secondary"
               onClick={() => { setAnalysis(""); setCvText(""); setJobDescription(""); }}
-              style={{ marginTop: "12px" }}
+              style={{
+                width: "100%",
+                padding: "13px",
+                borderRadius: "10px",
+                border: "1px solid var(--border)",
+                background: "transparent",
+                color: "var(--text-muted)",
+                fontFamily: "Syne, sans-serif",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+                letterSpacing: "0.04em",
+              }}
             >
               Start over
             </button>
           </div>
         )}
+
       </div>
     </main>
   );

@@ -3,79 +3,189 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type FormData = {
+  full_name: string; email: string; phone: string; location: string;
+  summary: string; experience: string; education: string; skills: string;
+};
+
+function MinimalTemplate({ data, cv }: { data: FormData; cv: string }) {
+  return (
+    <div style={{ fontFamily: "Georgia, serif", color: "#1a1a2e", lineHeight: 1.7, padding: "48px" }}>
+      <h1 style={{ fontSize: "30px", fontWeight: 700, marginBottom: "4px", letterSpacing: "-0.02em" }}>{data.full_name}</h1>
+      <div style={{ fontSize: "13px", color: "#666", marginBottom: "28px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+        <span>{data.email}</span><span>·</span><span>{data.phone}</span><span>·</span><span>{data.location}</span>
+      </div>
+      <hr style={{ border: "none", borderTop: "1px solid #e5e5e5", marginBottom: "24px" }} />
+      <pre style={{ whiteSpace: "pre-wrap", fontSize: "14px", lineHeight: 1.8, fontFamily: "Georgia, serif" }}>{cv}</pre>
+    </div>
+  );
+}
+
+function ClassicTemplate({ data, cv }: { data: FormData; cv: string }) {
+  return (
+    <div style={{ fontFamily: "Times New Roman, serif", color: "#1a1a2e", lineHeight: 1.65, padding: "48px" }}>
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
+        <h1 style={{ fontSize: "26px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{data.full_name}</h1>
+        <p style={{ fontSize: "13px", color: "#555" }}>{data.email} &nbsp;|&nbsp; {data.phone} &nbsp;|&nbsp; {data.location}</p>
+      </div>
+      <hr style={{ border: "none", borderTop: "2px solid #1a1a2e", marginBottom: "24px" }} />
+      <pre style={{ whiteSpace: "pre-wrap", fontSize: "14px", lineHeight: 1.8, fontFamily: "Times New Roman, serif" }}>{cv}</pre>
+    </div>
+  );
+}
+
+function CreativeTemplate({ data, cv }: { data: FormData; cv: string }) {
+  return (
+    <div style={{ display: "flex", minHeight: "600px", fontFamily: "sans-serif" }}>
+      <div style={{ width: "220px", flexShrink: 0, background: "#00e5ff", padding: "36px 24px", color: "#080b12" }}>
+        <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 800, marginBottom: "16px" }}>
+          {data.full_name.charAt(0)}
+        </div>
+        <h1 style={{ fontSize: "17px", fontWeight: 800, lineHeight: 1.2, marginBottom: "24px" }}>{data.full_name}</h1>
+        <div style={{ marginBottom: "24px" }}>
+          <p style={{ fontSize: "9px", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "8px", opacity: 0.5 }}>Contact</p>
+          {[data.email, data.phone, data.location].map((item, idx) => (
+            <p key={idx} style={{ fontSize: "11px", marginBottom: "4px", wordBreak: "break-word" }}>{item}</p>
+          ))}
+        </div>
+      </div>
+      <div style={{ flex: 1, padding: "36px 28px", color: "#1a1a2e" }}>
+        <pre style={{ whiteSpace: "pre-wrap", fontSize: "13px", lineHeight: 1.8, fontFamily: "sans-serif" }}>{cv}</pre>
+      </div>
+    </div>
+  );
+}
+
+const TEMPLATES = [
+  { id: "minimal", label: "Minimal" },
+  { id: "classic", label: "Classic" },
+  { id: "creative", label: "Creative" },
+];
+
 export default function Result() {
   const router = useRouter();
+  const [formData, setFormData] = useState<FormData | null>(null);
+  const [template, setTemplate] = useState("minimal");
   const [cv, setCv] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("generatedCV");
-    if (!saved) router.push("/builder");
-    else setCv(saved);
-  }, [router]);
+  const savedForm = localStorage.getItem("cvFormData");
+  const savedTemplate = localStorage.getItem("cvTemplate");
+  const savedCV = localStorage.getItem("generatedCV");
+  if (!savedForm || !savedCV) { router.push("/builder"); return; }
+  setFormData(JSON.parse(savedForm));
+  setCv(savedCV);
+  if (savedTemplate) setTemplate(savedTemplate);
+}, [router]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(cv);
+    if (!formData) return;
+    const text = `${formData.full_name}\n${formData.email} | ${formData.phone} | ${formData.location}\n\nSUMMARY\n${formData.summary}\n\nEXPERIENCE\n${formData.experience}\n\nEDUCATION\n${formData.education}\n\nSKILLS\n${formData.skills}`;
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  return (
-    <main className="page">
-      <div className="glow" style={{ top: "-100px", left: "-200px" }} />
-      <div className="container" style={{ position: "relative", zIndex: 1 }}>
+  if (!formData) return null;
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
+  return (
+    <main style={{ padding: "40px 24px", minHeight: "calc(100vh - 60px)" }}>
+      <div style={{ maxWidth: "740px", margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "32px" }}>
           <div>
-            <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "36px", marginBottom: "4px" }}>
+            <p style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: "6px" }}>
+              Generated by AI
+            </p>
+            <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "30px", letterSpacing: "-0.02em", color: "white" }}>
               Your CV
             </h1>
-            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px" }}>Generated by AI — ready to use</p>
           </div>
-          <button
-            onClick={() => router.push("/builder")}
-            style={{
-              background: "none", border: "1px solid var(--border)", borderRadius: "8px",
-              color: "rgba(255,255,255,0.4)", padding: "8px 16px", cursor: "pointer",
-              fontSize: "13px", fontFamily: "DM Sans, sans-serif",
-            }}
-          >
-            ← Edit
-          </button>
+          <button onClick={() => router.push("/builder")} style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            borderRadius: "8px",
+            color: "var(--text-muted)",
+            padding: "8px 16px",
+            cursor: "pointer",
+            fontSize: "12px",
+            fontFamily: "Syne, sans-serif",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            marginTop: "8px",
+          }}>← Edit</button>
+        </div>
+
+        {/* Template switcher */}
+        <div style={{ display: "flex", gap: "6px", marginBottom: "20px" }}>
+          {TEMPLATES.map(t => (
+            <button key={t.id} onClick={() => setTemplate(t.id)} style={{
+              padding: "8px 20px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontFamily: "Syne, sans-serif",
+              fontWeight: 700,
+              fontSize: "12px",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              border: template === t.id ? "1px solid var(--accent)" : "1px solid var(--border)",
+              background: template === t.id ? "var(--accent-dim)" : "var(--surface)",
+              color: template === t.id ? "var(--accent)" : "var(--text-muted)",
+              transition: "all 0.2s",
+            }}>{t.label}</button>
+          ))}
         </div>
 
         {/* CV Preview */}
-        <div style={{
-          background: "white",
-          borderRadius: "16px",
-          padding: "48px",
-          marginBottom: "16px",
-          boxShadow: "0 25px 80px rgba(0,0,0,0.5)",
+        <div
+          id="cv-preview" 
+          style={{
+            background: "white",
+            borderRadius: "14px",
+            overflow: "hidden",
+            marginBottom: "14px",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
         }}>
-          <pre style={{
-            whiteSpace: "pre-wrap",
-            fontFamily: "DM Sans, sans-serif",
-            fontSize: "14px",
-            lineHeight: 1.8,
-            color: "#1a1a2e",
-          }}>
-            {cv}
-          </pre>
+          {template === "minimal" && <MinimalTemplate data={formData} cv={cv} />}
+          {template === "classic" && <ClassicTemplate data={formData} cv={cv} />}
+          {template === "creative" && <CreativeTemplate data={formData} cv={cv} />}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-          <button className="btn-secondary" onClick={handleCopy}>
-            {copied ? "✓ Copied!" : "Copy text"}
-          </button>
-          <button className="btn-primary" onClick={() => window.print()}>
-            Save as PDF
-          </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+          <button onClick={handleCopy} style={{
+            padding: "13px",
+            borderRadius: "10px",
+            border: "1px solid var(--border)",
+            background: "var(--surface)",
+            color: "var(--text-muted)",
+            fontFamily: "Syne, sans-serif",
+            fontSize: "13px",
+            fontWeight: 700,
+            cursor: "pointer",
+            letterSpacing: "0.04em",
+            transition: "all 0.2s",
+          }}>{copied ? "✓ Copied!" : "Copy text"}</button>
+          <button onClick={() => window.print()} style={{
+            padding: "13px",
+            borderRadius: "10px",
+            border: "none",
+            background: "var(--accent)",
+            color: "#080b12",
+            fontFamily: "Syne, sans-serif",
+            fontSize: "13px",
+            fontWeight: 800,
+            cursor: "pointer",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+          }}>Save as PDF</button>
         </div>
-
-        <p style={{ textAlign: "center", color: "rgba(255,255,255,0.2)", fontSize: "12px", marginTop: "16px" }}>
-          Save as PDF → in print dialog choose "Save as PDF"
+        <p style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "11px", marginTop: "12px", opacity: 0.5 }}>
+          In print dialog → choose "Save as PDF"
         </p>
+
       </div>
     </main>
   );

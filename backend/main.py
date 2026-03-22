@@ -29,6 +29,7 @@ class CVData(BaseModel):
     experience: str
     education: str
     skills: str
+    language: str="english"
 
 @app.get("/")
 def root():
@@ -37,9 +38,10 @@ def root():
 @app.post("/generate-cv")
 def generate_cv(data: CVData):
     prompt = f"""
-    Na temelju ovih podataka napiši profesionalni CV na engleskom jeziku.
+    Na temelju ovih podataka napiši profesionalni CV na {"engleskom" if data.language == "english" else "hrvatskom"} jeziku.
     Formatiraj ga jasno s odjeljcima: Summary, Experience, Education, Skills.
-    
+    VAŽNO: Ne koristi markdown formatiranje. Bez **, ##, *, ili bilo kakvih simbola. Samo čisti tekst.
+
     Ime: {data.full_name}
     Email: {data.email}
     Telefon: {data.phone}
@@ -48,8 +50,8 @@ def generate_cv(data: CVData):
     Radno iskustvo: {data.experience}
     Obrazovanje: {data.education}
     Vještine: {data.skills}
-    
-    Napiši profesionalni, impresivni CV koji ističe kandidatove kvalitete.
+
+    Napiši profesionalni, impresivni CV koji ističe kandidatove kvalitete. Bez markdown formatiranja.
     """
 
     response = client.chat.completions.create(
