@@ -2,7 +2,7 @@
 
 A full-stack AI-powered CV generator and analyzer built with Next.js and FastAPI.
 
-🔗 **Live demo:** [your-app.vercel.app](https://your-app.vercel.app)
+🔗 **Live demo:** [https://ai-cv-app-sand.vercel.app/]
 
 ## Features
 
